@@ -1,0 +1,40 @@
+import logging
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+
+# توکن بات رو اینجا وارد کن
+TOKEN = '7310846345:AAFoXrWoycTpivfIThMqUb9Db1GlNCqfGVk'
+
+# فعال کردن لاگ برای خطاها
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# دستور استارت
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text("سلام! لطفاً وزن طلا (به گرم) رو وارد کن تا قیمت رو حساب کنم.")
+
+# تابع محاسبه قیمت طلا
+def calculate_price(update: Update, context: CallbackContext):
+    try:
+        weight = float(update.message.text)
+        price = (750 / 705 / 4.6082) * weight
+        update.message.reply_text(f"قیمت تقریبی طلا برای وزن {weight} گرم: {price:.2f} تومان")
+    except ValueError:
+        update.message.reply_text("لطفاً وزن رو به صورت عدد وارد کن!")
+
+def main():
+    # ساخت Updater و اتصال بات
+    updater = Updater(TOKEN, use_context=True)
+    dp = updater.dispatcher
+
+    # اضافه کردن هنده‌ها
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, calculate_price))
+
+    # شروع بات
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
